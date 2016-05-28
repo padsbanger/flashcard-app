@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import { Link } from 'react-router'
+
 import { addDeck, showAddDeck, hideAddDeck } from '../actions/index'
 
 class Sidebar extends Component {
@@ -20,10 +22,11 @@ class Sidebar extends Component {
     return (
       <div>
         <h2>All decks</h2>
-        <button onClick={this.props.showAddDeck}>+</button>
         <ul>
           {this.props.decks.map((deck, i) => {
-            return <li key={i}> {deck.name} </li>
+            return (
+              <li key={i}><Link to={'/deck/'+deck.id}> {deck.name} </Link></li>
+            )
           })}
         </ul>
         {this.props.addingDeck && <input onKeyPress={this.createDeck.bind(this)} /> }

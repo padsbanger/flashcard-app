@@ -2,6 +2,8 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
   require('time-grunt')(grunt);
 
+   var modRewrite = require('connect-modrewrite');
+
   grunt.initConfig({
     browserify: {
       dist: {
@@ -53,6 +55,10 @@ module.exports = function(grunt) {
               options.base = [options.base];
             }
             middlewares.push(require('grunt-connect-proxy/lib/utils').proxyRequest);
+
+            middlewares.push(modRewrite([
+                  '^[^\\.]*$ /index.html [L]'
+                ]))
 
             options.base.forEach(function(base) {
               middlewares.push(connect.static(base));

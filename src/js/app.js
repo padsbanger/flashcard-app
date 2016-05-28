@@ -2,34 +2,51 @@ import ReactDOM from 'react-dom'
 import React, { Component } from 'react'
 import {combineReducers, createStore} from 'redux'
 import { Provider } from 'react-redux'
+import { Router, Route, browserHistory } from 'react-router'
+import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
 
-import {cards, decks, addingDeck} from './reducers/index'
+import * as localStore from './localStore'
 
-import Sidebar from './components/Sidebar'
+import {cards, decks, addingDeck, cardFilter} from './reducers/index'
+
+import App from './components/App'
+import VisibleCards from './components/VisibleCards'
+import NewCardModal from './components/NewCardModal'
+import EditCardModal from './components/EditCardModal'
+import StudyModal from './components/StudyModal'
 
 const rootReducer = combineReducers({
-  cards, decks, addingDeck
+  cards,
+  decks,
+  addingDeck,
+  cardFilter,
+  routing: routerReducer
 })
 
-let store = createStore(rootReducer)
+let store = createStore(rootReducer, localStore.get())
 
-class App extends Component {
-  constructor(props) {
-    super(props)
-  }
+const history = syncHistoryWithStore(browserHistory, store)
 
-  render() {
-    return (
-       <Provider store={store}>
-        <div>
-          <Sidebar/>
-        </div>
-      </Provider>
-    )
-  }
+function run() {
+  let state = store.getState()
+  localStore.set(state, ['decks', 'cards'])
+
+  ReactDOM.render(
+    <Provider store={store}>
+      <Router history={history}>
+        <Route path="/" component={App}>
+          <Route path='/deck/:deckId' component={VisibleCards} >
+            <Route path='/deck/:deckId/new' component={NewCardModal} />
+            <Route path='/deck/:deckId/edit/:cardId' component={EditCardModal} />
+            <Route path='/deck/:deckId/study' component={StudyModal} />
+          </Route>
+        </Route>
+      </Router>
+   </Provider> ,
+    document.getElementById('app')
+  )
 }
 
-ReactDOM.render(
-  <App></App> ,
-  document.getElementById('app')
-)
+run()
+
+store.subscribe(run)
